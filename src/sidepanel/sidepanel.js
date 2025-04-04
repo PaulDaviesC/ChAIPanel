@@ -3,46 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const messageInput = document.getElementById('messageInput');
   const sendButton = document.getElementById('sendButton');
 
-  // Check for API key on load
-  chrome.storage.local.get(['openaiApiKey'], (result) => {
-    if (!result.openaiApiKey) {
-      const setupMessage = document.createElement('div');
-      setupMessage.className = 'message assistant-message';
-      setupMessage.innerHTML = `
-        <p>Welcome to ChAIPanel! To get started, you need to add your OpenAI API key to the extension.</p>
-        <p>Here's how to add your key:</p>
-        <ol style="margin: 8px 0; padding-left: 20px;">
-          <li>Click the "Open Settings" button below</li>
-          <li>In the settings page, paste your OpenAI API key in the input field</li>
-          <li>Click the "Save" button</li>
-          <li>Return to this panel and start chatting!</li>
-        </ol>
-        <p style="color: #666; font-size: 0.9em; margin-top: 8px;">
-          Note: Your API key is stored securely in your browser's local storage and is never sent anywhere except to OpenAI's servers.
-        </p>
-        <button id="openSettings" style="
-          margin-top: 8px;
-          padding: 8px 16px;
-          background-color: var(--primary-color);
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-        ">Open Settings</button>
-      `;
-      chatContainer.appendChild(setupMessage);
-
-      // Add click handler for settings button
-      document.getElementById('openSettings').addEventListener('click', () => {
-        chrome.runtime.openOptionsPage();
-      });
-
-      // Disable input until API key is set
-      messageInput.disabled = true;
-      sendButton.disabled = true;
-    }
-  });
-
   // Function to create loading indicator
   function createLoadingIndicator() {
     const loadingDiv = document.createElement('div');

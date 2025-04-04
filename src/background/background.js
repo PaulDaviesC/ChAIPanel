@@ -62,25 +62,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-// Handle keyboard shortcut
-chrome.commands.onCommand.addListener((command) => {
-  if (command === '_execute_action') {
-    // Get the current window
-    chrome.windows.getCurrent((window) => {
-      // Check if the side panel is open
-      chrome.sidePanel.getOptions({ windowId: window.id }, (options) => {
-        if (options && options.enabled) {
-          // If panel is open, close it
-          chrome.sidePanel.setOptions({ windowId: window.id, enabled: false });
-        } else {
-          // If panel is closed, open it
-          chrome.sidePanel.open({ windowId: window.id });
-        }
-      });
-    });
-  }
-});
-
 // Open side panel when extension icon is clicked
 chrome.action.onClicked.addListener((tab) => {
   chrome.sidePanel.open({ windowId: tab.windowId });
