@@ -158,6 +158,21 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    #getContextButton {
+      padding: 6px 12px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.2s;
+    }
+
+    #getContextButton:hover {
+      background-color: var(--primary-hover);
+    }
+
     .context-message {
       background-color: #e8f5e9;
       border-left: 4px solid var(--primary-color);
@@ -180,6 +195,7 @@
 <body>
   <div id="header">
     <h1>ChatGPT</h1>
+    <button id="getContextButton">Get Page Context</button>
   </div>
   <div id="chatContainer"></div>
   <div id="inputContainer">
