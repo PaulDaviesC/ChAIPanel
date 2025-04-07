@@ -9,6 +9,10 @@ A Chrome extension that allows you to access ChatGPT in a convenient side panel,
 - Persistent chat sessions
 - Customizable settings
 - Clean and modern interface
+- Intelligent page content extraction for context-aware conversations
+- Automatic detection of main content areas on web pages
+- Smart filtering of navigation, headers, and footers
+- Content length optimization for efficient processing
 
 ## Installation
 
@@ -38,11 +42,13 @@ A Chrome extension that allows you to access ChatGPT in a convenient side panel,
 ```
 ├── src/
 │   ├── background/    # Background service worker
+│   ├── content/       # Content scripts for page interaction
 │   ├── popup/         # Extension popup interface
 │   ├── settings/      # Settings page
 │   └── sidepanel/     # Main ChatGPT interface
 ├── public/            # Static assets
 │   └── icons/         # Extension icons
+├── style.css          # Global styles
 └── manifest.json      # Extension configuration
 ```
 
