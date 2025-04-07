@@ -86,7 +86,7 @@ function getPageContent() {
     content = content
         .replace(/\s+/g, ' ')
         .trim()
-        .substring(0, 2000); // Limit content length
+        .substring(0, 2800); // Limit content length
     
     return {
         title,
