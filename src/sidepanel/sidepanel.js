@@ -44,6 +44,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Configure marked options
+  marked.setOptions({
+    highlight: function(code, lang) {
+      if (lang && hljs.getLanguage(lang)) {
+        try {
+          return hljs.highlight(code, { language: lang }).value;
+        } catch (e) {
+          console.error('Error highlighting code:', e);
+        }
+      }
+      return code;
+    },
+    breaks: true,
+    gfm: true
+  });
+
   // Function to create loading indicator
   function createLoadingIndicator() {
     const loadingDiv = document.createElement('div');
@@ -60,7 +76,27 @@ document.addEventListener('DOMContentLoaded', () => {
   function addMessage(text, isUser = false) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
-    messageDiv.textContent = text;
+    
+    // Parse markdown for assistant messages, keep user messages as plain text
+    if (isUser) {
+      messageDiv.textContent = text;
+    } else {
+      // Sanitize the text to prevent XSS
+      const sanitizedText = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+      
+      messageDiv.innerHTML = marked.parse(sanitizedText);
+      
+      // Apply syntax highlighting to code blocks
+      messageDiv.querySelectorAll('pre code').forEach((block) => {
+        hljs.highlightBlock(block);
+      });
+    }
+    
     chatContainer.appendChild(messageDiv);
     chatContainer.scrollTop = chatContainer.scrollHeight;
   }

@@ -2,6 +2,9 @@
 <html>
 <head>
   <title>ChatGPT Side Panel</title>
+  <link rel="stylesheet" href="../lib/highlight.min.css">
+  <script src="../lib/marked.min.js"></script>
+  <script src="../lib/highlight.min.js"></script>
   <style>
     :root {
       --primary-color: #10a37f;
@@ -11,6 +14,8 @@
       --border-color: #e5e5e5;
       --text-color: #333;
       --input-bg: #ffffff;
+      --code-bg: #f8f9fa;
+      --code-border: #e9ecef;
     }
 
     body {
@@ -55,6 +60,64 @@
       border-radius: 12px;
       animation: fadeIn 0.3s ease-out;
       word-wrap: break-word;
+    }
+
+    .message pre {
+      background-color: var(--code-bg);
+      border: 1px solid var(--code-border);
+      border-radius: 6px;
+      padding: 12px;
+      overflow-x: auto;
+      margin: 8px 0;
+    }
+
+    .message code {
+      font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9em;
+      background-color: var(--code-bg);
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+
+    .message pre code {
+      background-color: transparent;
+      padding: 0;
+    }
+
+    .message p {
+      margin: 8px 0;
+    }
+
+    .message ul, .message ol {
+      margin: 8px 0;
+      padding-left: 24px;
+    }
+
+    .message li {
+      margin: 4px 0;
+    }
+
+    .message blockquote {
+      border-left: 4px solid var(--primary-color);
+      margin: 8px 0;
+      padding: 4px 12px;
+      color: #666;
+    }
+
+    .message table {
+      border-collapse: collapse;
+      margin: 8px 0;
+      width: 100%;
+    }
+
+    .message th, .message td {
+      border: 1px solid var(--border-color);
+      padding: 8px;
+      text-align: left;
+    }
+
+    .message th {
+      background-color: var(--code-bg);
     }
 
     .user-message {
