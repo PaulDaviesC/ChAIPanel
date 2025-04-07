@@ -81,15 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isUser) {
       messageDiv.textContent = text;
     } else {
-      // Sanitize the text to prevent XSS
-      const sanitizedText = text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-      
-      messageDiv.innerHTML = marked.parse(sanitizedText);
+      messageDiv.innerHTML = marked.parse(text);
       
       // Apply syntax highlighting to code blocks
       messageDiv.querySelectorAll('pre code').forEach((block) => {
