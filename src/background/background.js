@@ -13,7 +13,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log('Received message:', message.message);
     
     // Get API key from storage
-    chrome.storage.local.get(['openaiApiKey'], (result) => {
+    chrome.storage.local.get(['openaiApiKey'], async (result) => {
       if (!result.openaiApiKey) {
         chrome.runtime.sendMessage({
           type: 'RECEIVE_MESSAGE',
@@ -21,6 +21,55 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         });
         return;
       }
+
+      // Get page context if available
+      let pageContext = null;
+      if (message.includeContext) {
+        try {
+          const tabs = await chrome.tabs.query({active: true, currentWindow: true});
+          if (tabs[0] && !tabs[0].url.startsWith('chrome://') && 
+              !tabs[0].url.startsWith('edge://') && 
+              !tabs[0].url.startsWith('about:') && 
+              !tabs[0].url.startsWith('chrome-extension://')) {
+            
+            try {
+              await chrome.scripting.executeScript({
+                target: { tabId: tabs[0].id },
+                files: ['src/content/content.js']
+              });
+            } catch (e) {
+              // Script might already be injected, which is fine
+              console.log('Script injection result:', e);
+            }
+            
+            pageContext = await chrome.tabs.sendMessage(tabs[0].id, {type: 'GET_PAGE_CONTEXT'});
+          }
+        } catch (error) {
+          console.error('Error getting page context:', error);
+        }
+      }
+
+      // Prepare messages array
+      const messages = [];
+      
+      // Add system message with context if available
+      if (pageContext) {
+        messages.push({
+          role: "system",
+          content: `You are a helpful AI assistant. The user is currently viewing a webpage with the following context:
+Title: ${pageContext.title}
+URL: ${pageContext.url}
+Content: ${pageContext.content}
+
+Please use this context to provide more relevant responses to the user's questions about this webpage.`
+        });
+      }
+      
+      // Add user message
+      messages.push({
+        role: "user",
+        content: message.message
+      });
 
       // Send message to ChatGPT API
       fetch('https://api.openai.com/v1/chat/completions', {
@@ -31,10 +80,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         },
         body: JSON.stringify({
           model: "gpt-3.5-turbo",
-          messages: [{
-            role: "user",
-            content: message.message
-          }]
+          messages: messages
         })
       })
       .then(response => response.json())
@@ -53,6 +99,41 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         });
       });
     });
+  } else if (message.type === 'GET_TAB_CONTEXT') {
+    // Get the active tab
+    chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
+      if (tabs[0]) {
+        try {
+          // Check if we can inject the content script
+          if (tabs[0].url.startsWith('chrome://') || tabs[0].url.startsWith('edge://') || 
+              tabs[0].url.startsWith('about:') || tabs[0].url.startsWith('chrome-extension://')) {
+            sendResponse({error: 'Cannot access this page. Content scripts cannot run on browser internal pages.'});
+            return;
+          }
+          
+          // Try to execute the content script first to ensure it's loaded
+          try {
+            await chrome.scripting.executeScript({
+              target: { tabId: tabs[0].id },
+              files: ['src/content/content.js']
+            });
+          } catch (e) {
+            // Script might already be injected, which is fine
+            console.log('Script injection result:', e);
+          }
+          
+          // Now try to get the page context
+          const response = await chrome.tabs.sendMessage(tabs[0].id, {type: 'GET_PAGE_CONTEXT'});
+          sendResponse(response);
+        } catch (error) {
+          console.error('Error getting tab context:', error);
+          sendResponse({error: 'Failed to get page context: ' + error.message});
+        }
+      } else {
+        sendResponse({error: 'No active tab found'});
+      }
+    });
+    return true; // Required for async sendResponse
   } else if (message.type === 'SET_API_KEY') {
     // Store the API key
     chrome.storage.local.set({ openaiApiKey: message.apiKey }, () => {

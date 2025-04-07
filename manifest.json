@@ -3,10 +3,17 @@
     "name": "ChAIPanel",
     "version": "1.0",
     "description": "Open ChatGPT in a side panel for quick chatting",
-    "permissions": ["tabs", "sidePanel", "storage"],
+    "permissions": ["tabs", "sidePanel", "storage", "activeTab", "scripting"],
+    "host_permissions": ["<all_urls>"],
     "background": {
       "service_worker": "src/background/background.js"
     },
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["src/content/content.js"]
+      }
+    ],
     "action": {
       "default_icon": {
         "16": "public/icons/icon16.png",

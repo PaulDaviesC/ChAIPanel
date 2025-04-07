@@ -2,6 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatContainer = document.getElementById('chatContainer');
   const messageInput = document.getElementById('messageInput');
   const sendButton = document.getElementById('sendButton');
+  const getContextButton = document.getElementById('getContextButton');
+  const contextCheckbox = document.getElementById('contextCheckbox');
 
   // Check for API key on load
   chrome.storage.local.get(['openaiApiKey'], (result) => {
@@ -64,6 +66,20 @@ document.addEventListener('DOMContentLoaded', () => {
     chatContainer.scrollTop = chatContainer.scrollHeight;
   }
 
+  // Function to add context message
+  function addContextMessage(context) {
+    const contextDiv = document.createElement('div');
+    contextDiv.className = 'context-message';
+    contextDiv.innerHTML = `
+      <h3>Page Context</h3>
+      <p><strong>Title:</strong> ${context.title}</p>
+      <p><strong>URL:</strong> ${context.url}</p>
+      <p><strong>Content:</strong> ${context.content}</p>
+    `;
+    chatContainer.appendChild(contextDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+
   // Handle sending messages
   async function sendMessage() {
     const message = messageInput.value.trim();
@@ -83,7 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Send message to background script
         await chrome.runtime.sendMessage({
           type: 'SEND_MESSAGE',
-          message: message
+          message: message,
+          includeContext: contextCheckbox.checked
         });
       } catch (error) {
         console.error('Error sending message:', error);
@@ -97,6 +114,36 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   }
+
+  // Handle getting page context
+  getContextButton.addEventListener('click', async () => {
+    // Show loading state
+    getContextButton.disabled = true;
+    getContextButton.textContent = 'Loading...';
+    
+    try {
+      const response = await chrome.runtime.sendMessage({type: 'GET_TAB_CONTEXT'});
+      if (response.error) {
+        addMessage('Failed to get page context: ' + response.error, false);
+        
+        // Add helpful message based on error
+        if (response.error.includes('browser internal pages')) {
+          addMessage('Content scripts cannot run on browser internal pages like chrome://, about:, or extension pages.', false);
+        } else if (response.error.includes('No active tab found')) {
+          addMessage('No active tab was found. Please make sure you have a webpage open.', false);
+        }
+      } else {
+        addContextMessage(response);
+      }
+    } catch (error) {
+      console.error('Error getting tab context:', error);
+      addMessage('Failed to get page context. Please try again.', false);
+    } finally {
+      // Reset button state
+      getContextButton.disabled = false;
+      getContextButton.textContent = 'Get Page Context';
+    }
+  });
 
   // Event listeners
   sendButton.addEventListener('click', sendMessage);

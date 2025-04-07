@@ -30,6 +30,7 @@
       border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 8px;
     }
 
@@ -73,7 +74,24 @@
       border-top: 1px solid var(--border-color);
       background-color: var(--input-bg);
       display: flex;
+      flex-direction: column;
       gap: 8px;
+    }
+
+    #inputRow {
+      display: flex;
+      gap: 8px;
+    }
+
+    #contextCheckbox {
+      margin-right: 8px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      color: #666;
     }
 
     #messageInput {
@@ -139,16 +157,56 @@
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    #getContextButton {
+      padding: 6px 12px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.2s;
+    }
+
+    #getContextButton:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .context-message {
+      background-color: #e8f5e9;
+      border-left: 4px solid var(--primary-color);
+      padding: 12px;
+      margin: 8px 0;
+      font-size: 0.9em;
+    }
+
+    .context-message h3 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+    }
+
+    .context-message p {
+      margin: 0;
+      color: #666;
+    }
   </style>
 </head>
 <body>
   <div id="header">
     <h1>ChatGPT</h1>
+    <button id="getContextButton">Get Page Context</button>
   </div>
   <div id="chatContainer"></div>
   <div id="inputContainer">
-    <input type="text" id="messageInput" placeholder="Type your message...">
-    <button id="sendButton">Send</button>
+    <div id="inputRow">
+      <input type="text" id="messageInput" placeholder="Type your message...">
+      <button id="sendButton">Send</button>
+    </div>
+    <label class="checkbox-label">
+      <input type="checkbox" id="contextCheckbox" checked>
+      Include page context with messages
+    </label>
   </div>
   <script src="sidepanel.js"></script>
 </body>
